@@ -2,7 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using presupuestoAPIEv.Response;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace presupuestoAPIEv.Controllers
 {
@@ -11,9 +16,63 @@ namespace presupuestoAPIEv.Controllers
     public class UsuarioController : ControllerBase
     {
         private PresupuestoContext db;
-        public UsuarioController(PresupuestoContext context)
+        private IConfiguration _configuration;
+        public UsuarioController(PresupuestoContext context, IConfiguration config)
         {
             db = context;
+            _configuration = config;
+        }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] Object login)
+        {
+            Console.WriteLine(login);
+            var data = JsonConvert.DeserializeObject<dynamic>(login.ToString());
+            var email = "";
+            var pass = "";
+            if (data.email != null && data.pass != null)
+            {
+                email = data.email;
+                pass = data.pass;
+            }
+
+            var user = db.Usuarios
+                .Where(x => x.email == email && x.pass == pass)
+                .FirstOrDefault();
+
+            Resp r = new();
+            if (user == null)
+            {
+                r.Message = "Clave o Email incorrecto";
+                return NotFound(r);
+            }
+
+            var jwt = _configuration.GetSection("Jwt").Get<Jwt>();
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, jwt.Subject),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                new Claim("email", user.email.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
+            var logeo = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                    jwt.Issuer,
+                    jwt.Audience,
+                    claims,
+                    expires: DateTime.Now.AddMinutes(60),
+                    signingCredentials: logeo
+                );
+
+            r.Message = "Se ha logeado con exito";
+            r.Success = true;
+            r.Data = new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(r);
         }
 
         [HttpGet]

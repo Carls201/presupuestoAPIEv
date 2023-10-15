@@ -72,7 +72,9 @@ namespace DB.Migrations
                     nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     apellido = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     edad = table.Column<int>(type: "int", nullable: false),
-                    direccion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    direccion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    pass = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

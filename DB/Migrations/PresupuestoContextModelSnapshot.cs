@@ -186,10 +186,18 @@ namespace DB.Migrations
                     b.Property<int>("edad")
                         .HasColumnType("int");
 
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("id_rol")
                         .HasColumnType("int");
 
                     b.Property<string>("nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("pass")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

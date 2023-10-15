@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(PresupuestoContext))]
-    [Migration("20231015170317_InitDB")]
+    [Migration("20231015212856_InitDB")]
     partial class InitDB
     {
         /// <inheritdoc />
@@ -189,10 +189,18 @@ namespace DB.Migrations
                     b.Property<int>("edad")
                         .HasColumnType("int");
 
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("id_rol")
                         .HasColumnType("int");
 
                     b.Property<string>("nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("pass")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

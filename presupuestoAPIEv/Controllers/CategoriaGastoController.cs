@@ -8,10 +8,10 @@ namespace presupuestoAPIEv.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RolController : ControllerBase
+    public class CategoriaGastoController : ControllerBase
     {
         private readonly PresupuestoContext db;
-        public RolController(PresupuestoContext context)
+        public CategoriaGastoController(PresupuestoContext context)
         {
             db = context;
         }
@@ -20,26 +20,25 @@ namespace presupuestoAPIEv.Controllers
         public async Task<IActionResult> Get()
         {
             Resp r = new();
+
             try
             {
-                var rols = await db.Rols.Select(a => new
+                var catGastos = await db.CategoriaGastos.Select(x => new
                 {
-                    id = a.id_rol,
-                    rol = a.rol
+                    x.id_categoria,
+                    x.nombre
                 }).ToListAsync();
 
-                if (rols.Any())
+                if (catGastos.Any())
                 {
-                    r.Data = rols;
+                    r.Data = catGastos;
                     r.Success = true;
                     r.Message = "Los datos se han mostrado con exito";
                     return Ok(r);
                 }
-
-                r.Message = "No existen registros";
+                r.Message = "No se han encotrado datos";
                 r.Success = true;
                 return Ok(r);
-
             }
             catch (Exception ex)
             {
@@ -49,89 +48,90 @@ namespace presupuestoAPIEv.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostRol(Rol rol)
+        public async Task<IActionResult> PostCategoriaGasto(CategoriaGasto categoriaGasto)
         {
             Resp r = new();
-            if (rol.rol == null || rol.rol == "")
+            if(categoriaGasto.nombre == "" || categoriaGasto.nombre == null)
             {
                 r.Message = "Los campos no pueden quedar vacio";
                 return BadRequest(r);
             }
 
-            db.Rols.Add(rol);
+            db.Add(categoriaGasto);
             await db.SaveChangesAsync();
             r.Message = "Se ha guardado con exito";
             r.Success = true;
-            r.Data = rol.rol;
-            return CreatedAtAction("Get", r, rol);
-
+            r.Data = categoriaGasto.id_categoria;
+            return CreatedAtAction("Get", r, categoriaGasto);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRol(int id)
+        public async Task<IActionResult> DeleteCategoriaGasto(int id)
         {
             Resp r = new();
-            var rol = await db.Rols.FindAsync(id);
+            var catGasto = await db.CategoriaGastos.FindAsync(id);
 
-            if (rol == null)
+            if(catGasto == null)
             {
-                r.Message = "No existe el 'rol";
+                r.Message = "La categoria no existe";
                 return BadRequest(r);
             }
 
-            db.Rols.Remove(rol);
+            db.CategoriaGastos.Remove(catGasto);
             await db.SaveChangesAsync();
             r.Success = true;
-            r.Message = "El Rol se ha eliminado con exito";
+            r.Message = "Se ha eliminado con exito";
             return Ok(r);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRol(int id, Rol rol)
+        public async Task<IActionResult> PutCategoriaGasto(int id, CategoriaGasto catGasto)
         {
             Resp r = new();
-            var rolx = await db.Rols.Select(r => new
+            var cat = await db.CategoriaGastos.Select(x => new
             {
-                id = r.id_rol,
-                rol = r.rol
-            }).FirstOrDefaultAsync(x => x.id == id);
+                x.id_categoria,
+                x.nombre
+            }).FirstOrDefaultAsync(x => x.id_categoria == id);
 
-            if (rolx == null)
+            if(cat == null)
             {
-                r.Message = "El rol que desea modificar no se encuentra";
+                r.Message = "Categoria no encntrada";
                 return BadRequest(r);
             }
-            if (id != rol.id_rol)
+            if(id != catGasto.id_categoria)
             {
-                r.Message = "El id que ingreso no coincide con el id del rol que desea modificar";
+                r.Message = "El id ingresado no coincide con el id de la categoria que desea modificar";
                 return BadRequest(r);
             }
 
-            db.Rols.Update(rol);
+            db.CategoriaGastos.Update(catGasto);
             await db.SaveChangesAsync();
             r.Success = true;
-            r.Message = "Rol editado con exito";
+            r.Message = "Categoria modificada";
             return Ok(r);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetRol(int id)
+        public async Task<IActionResult> GetCategoriaGasto(int id)
         {
             Resp r = new();
-            var rol = await db.Rols.Select(r => new
+            var catGasto = await db.CategoriaGastos.Select(x => new
             {
-                id = r.id_rol,
-                rol = r.rol
-            }).FirstOrDefaultAsync(x => x.id == id);
+                x.id_categoria,
+                x.nombre
+            }).FirstOrDefaultAsync(x => x.id_categoria == id);
 
-            if (rol == null)
+            if(catGasto == null)
             {
-                r.Message = $"No se encuentra el rol con id: {id}";
+                r.Message = "Categoria con encontrada";
                 return NotFound(r);
             }
+
             r.Success = true;
-            r.Data = rol;
+            r.Data = catGasto;
             return Ok(r);
         }
+
     }
 }
